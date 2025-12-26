@@ -1,0 +1,1549 @@
+<!DOCTYPE html>
+<!-- saved from url=(0040)file:///C:/Users/PC/Downloads/index.html -->
+<html lang="es"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestor de Producción - Fábrica de Colchones</title>
+    <link href="./Gestor de Producción - Fábrica de Colchones_files/css2" rel="stylesheet">
+    <script src="./Gestor de Producción - Fábrica de Colchones_files/jspdf.umd.min.js.descarga"></script>
+    <script src="./Gestor de Producción - Fábrica de Colchones_files/jspdf.plugin.autotable.min.js.descarga"></script>
+    <script src="./Gestor de Producción - Fábrica de Colchones_files/html-docx.js.min.js.descarga"></script>
+    <script src="./Gestor de Producción - Fábrica de Colchones_files/FileSaver.min.js.descarga"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #e4e8ec 100%);
+            min-height: 100vh;
+            color: #1f2937;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+            color: white;
+            padding: 20px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        .header h1 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .header-icon {
+            width: 40px;
+            height: 40px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .header-stats {
+            display: flex;
+            gap: 30px;
+        }
+
+        .stat-card {
+            background: rgba(255, 255, 255, 0.15);
+            padding: 12px 24px;
+            border-radius: 12px;
+            text-align: center;
+            backdrop-filter: blur(10px);
+        }
+
+        .stat-card .value {
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        .stat-card .label {
+            font-size: 0.75rem;
+            opacity: 0.9;
+            margin-top: 4px;
+        }
+
+        .main-container {
+            max-width: 1800px;
+            margin: 0 auto;
+            padding: 30px;
+        }
+
+        .grid-layout {
+            display: grid;
+            grid-template-columns: 400px 1fr;
+            gap: 30px;
+        }
+
+        @media (max-width: 1400px) {
+            .grid-layout {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .card {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            overflow: hidden;
+        }
+
+        .card-header {
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+            padding: 20px 24px;
+            border-bottom: 1px solid #e2e8f0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .card-header h2 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #1e3a8a;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .card-body {
+            padding: 24px;
+        }
+
+        /* Calendario Styles */
+        .calendar-nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .calendar-nav button {
+            background: #f1f5f9;
+            border: none;
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1.2rem;
+            color: #475569;
+            transition: all 0.2s;
+        }
+
+        .calendar-nav button:hover {
+            background: #e2e8f0;
+            color: #1e3a8a;
+        }
+
+        .calendar-nav .month-year {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #1e293b;
+        }
+
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 6px;
+        }
+
+        .calendar-day-header {
+            text-align: center;
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: #64748b;
+            padding: 8px 0;
+            text-transform: uppercase;
+        }
+
+        .calendar-day {
+            aspect-ratio: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 0.9rem;
+            position: relative;
+            background: #f8fafc;
+            border: 2px solid transparent;
+        }
+
+        .calendar-day:hover {
+            background: #e0f2fe;
+            border-color: #3b82f6;
+        }
+
+        .calendar-day.empty {
+            background: transparent;
+            cursor: default;
+        }
+
+        .calendar-day.today {
+            background: #fef3c7;
+            border-color: #f59e0b;
+        }
+
+        .calendar-day.selected {
+            background: #dbeafe;
+            border-color: #1e3a8a;
+        }
+
+        .calendar-day.has-data::after {
+            content: '';
+            position: absolute;
+            bottom: 6px;
+            width: 8px;
+            height: 8px;
+            background: #10b981;
+            border-radius: 50%;
+        }
+
+        /* Production Form Styles */
+        .info-bar {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .info-item {
+            background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+            padding: 12px 20px;
+            border-radius: 10px;
+            flex: 1;
+            min-width: 150px;
+        }
+
+        .info-item .label {
+            font-size: 0.75rem;
+            color: #64748b;
+            margin-bottom: 4px;
+        }
+
+        .info-item .value {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: #1e3a8a;
+        }
+
+        /* Production Table */
+        .production-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+        }
+
+        .production-table th {
+            background: #1e3a8a;
+            color: white;
+            padding: 12px 6px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-align: center;
+            vertical-align: middle;
+        }
+
+        .production-table th:first-child {
+            border-radius: 8px 0 0 0;
+            text-align: left;
+            padding-left: 16px;
+        }
+
+        .production-table th:last-child {
+            border-radius: 0 8px 0 0;
+            padding-right: 16px;
+        }
+
+        .production-table th.observation-header {
+            min-width: 200px;
+        }
+
+        .production-table td {
+            padding: 8px 6px;
+            border-bottom: 1px solid #e2e8f0;
+            text-align: center;
+        }
+
+        .production-table td:first-child {
+            text-align: left;
+            padding-left: 16px;
+            font-weight: 600;
+            color: #374151;
+            background: #f8fafc;
+        }
+
+        .production-table td:last-child {
+            padding-right: 16px;
+        }
+
+        .production-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .production-table tr:hover {
+            background: #f0f9ff;
+        }
+
+        .production-table input[type="number"] {
+            width: 60px;
+            padding: 6px 8px;
+            border: 2px solid #e2e8f0;
+            border-radius: 6px;
+            text-align: center;
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: #1e3a8a;
+            transition: all 0.2s;
+        }
+
+        .production-table input[type="number"]:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+        }
+
+        .production-table input[type="text"] {
+            width: 100%;
+            padding: 8px 12px;
+            border: 2px solid #e2e8f0;
+            border-radius: 6px;
+            text-align: left;
+            font-size: 0.85rem;
+            color: #475569;
+            transition: all 0.2s;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .production-table input[type="text"]:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+        }
+
+        .row-total {
+            font-weight: 700;
+            color: #1e3a8a;
+            background: #eff6ff !important;
+            border-radius: 6px;
+        }
+
+        .col-total {
+            font-weight: 700;
+            color: #059669;
+            background: #ecfdf5;
+            border-radius: 6px;
+        }
+
+        .grand-total {
+            font-size: 1.2rem;
+            font-weight: 800;
+            color: #1e3a8a;
+            background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+            border-radius: 10px;
+        }
+
+        /* Buttons */
+        .btn {
+            padding: 12px 24px;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.95rem;
+            border: none;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(16, 185, 129, 0.4);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+            color: white;
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+        }
+
+        .btn-secondary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(59, 130, 246, 0.4);
+        }
+
+        .btn-outline {
+            background: white;
+            color: #475569;
+            border: 2px solid #e2e8f0;
+        }
+
+        .btn-outline:hover {
+            border-color: #3b82f6;
+            color: #3b82f6;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        /* Stock Dashboard */
+        .stock-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 16px;
+        }
+
+        .stock-card {
+            background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+            border-radius: 12px;
+            padding: 16px;
+            border-left: 4px solid #3b82f6;
+        }
+
+        .stock-card .model-name {
+            font-size: 0.85rem;
+            color: #64748b;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+
+        .stock-card .stock-count {
+            font-size: 1.8rem;
+            font-weight: 800;
+            color: #1e3a8a;
+        }
+
+        .stock-card .stock-breakdown {
+            font-size: 0.7rem;
+            color: #94a3b8;
+            margin-top: 8px;
+        }
+
+        /* Export Section */
+        .export-section {
+            margin-top: 24px;
+            padding-top: 24px;
+            border-top: 2px dashed #e2e8f0;
+        }
+
+        .export-section h3 {
+            font-size: 1rem;
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 16px;
+        }
+
+        /* Toast Notifications */
+        .toast-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+        }
+
+        .toast {
+            background: white;
+            padding: 16px 24px;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            animation: slideIn 0.3s ease;
+            border-left: 4px solid #10b981;
+        }
+
+        .toast.error {
+            border-left-color: #ef4444;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .header {
+                flex-direction: column;
+                gap: 20px;
+                padding: 20px;
+            }
+
+            .header-stats {
+                width: 100%;
+                justify-content: space-around;
+            }
+
+            .main-container {
+                padding: 16px;
+            }
+
+            .production-table {
+                font-size: 0.7rem;
+            }
+
+            .production-table input[type="number"] {
+                width: 45px;
+                padding: 4px 6px;
+                font-size: 0.8rem;
+            }
+
+            .production-table input[type="text"] {
+                font-size: 0.75rem;
+            }
+
+            .btn-group {
+                flex-direction: column;
+            }
+
+            .btn {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+
+        /* Scrollable table container */
+        .table-container {
+            overflow-x: auto;
+            margin: 0 -24px;
+            padding: 0 24px;
+        }
+
+        .table-container table {
+            min-width: 1000px;
+        }
+
+        /* Legend */
+        .calendar-legend {
+            display: flex;
+            gap: 20px;
+            margin-top: 20px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.8rem;
+            color: #64748b;
+        }
+
+        .legend-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .legend-dot.today {
+            background: #fef3c7;
+            border: 2px solid #f59e0b;
+        }
+
+        .legend-dot.selected {
+            background: #dbeafe;
+            border: 2px solid #1e3a8a;
+        }
+
+        .legend-dot.has-data {
+            background: #10b981;
+        }
+
+        /* Quick actions */
+        .quick-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 16px;
+            flex-wrap: wrap;
+        }
+
+        .quick-action-btn {
+            padding: 6px 12px;
+            font-size: 0.8rem;
+            background: #f1f5f9;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            color: #475569;
+            transition: all 0.2s;
+        }
+
+        .quick-action-btn:hover {
+            background: #e2e8f0;
+            color: #1e3a8a;
+        }
+
+        /* Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal {
+            background: white;
+            border-radius: 16px;
+            padding: 30px;
+            max-width: 700px;
+            width: 90%;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        .modal h3 {
+            font-size: 1.2rem;
+            color: #1e293b;
+            margin-bottom: 16px;
+        }
+
+        .modal p {
+            color: #64748b;
+            margin-bottom: 24px;
+            line-height: 1.6;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+        }
+
+        /* Observation column styling */
+        .observation-cell {
+            min-width: 180px;
+            text-align: left !important;
+        }
+
+        .observation-label {
+            font-size: 0.7rem;
+            color: #94a3b8;
+            margin-bottom: 4px;
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <h1>
+            <div class="header-icon">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+                    <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
+                    <line x1="12" y1="22.08" x2="12" y2="12"></line>
+                </svg>
+            </div>
+            Gestor de Producción - Fábrica de Colchones
+        </h1>
+        <div class="header-stats">
+            <div class="stat-card">
+                <div class="value" id="total-production-month">0</div>
+                <div class="label">Producción del Mes</div>
+            </div>
+            <div class="stat-card">
+                <div class="value" id="total-stock">0</div>
+                <div class="label">Stock Total</div>
+            </div>
+            <div class="stat-card">
+                <div class="value" id="days-with-production">0</div>
+                <div class="label">Días con Producción</div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-container">
+        <div class="grid-layout">
+            <!-- Left Column: Calendar -->
+            <div class="card">
+                <div class="card-header">
+                    <h2>
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                            <line x1="16" y1="2" x2="16" y2="6"></line>
+                            <line x1="8" y1="2" x2="8" y2="6"></line>
+                            <line x1="3" y1="10" x2="21" y2="10"></line>
+                        </svg>
+                        Calendario de Producción
+                    </h2>
+                </div>
+                <div class="card-body">
+                    <div class="calendar-nav">
+                        <button onclick="changeMonth(-1)">←</button>
+                        <span class="month-year" id="month-year">diciembre de 2025</span>
+                        <button onclick="changeMonth(1)">→</button>
+                    </div>
+                    <div class="calendar-grid" id="calendar-grid"><div class="calendar-day-header">Dom</div><div class="calendar-day-header">Lun</div><div class="calendar-day-header">Mar</div><div class="calendar-day-header">Mié</div><div class="calendar-day-header">Jue</div><div class="calendar-day-header">Vie</div><div class="calendar-day-header">Sáb</div><div class="calendar-day empty"></div><div class="calendar-day">1</div><div class="calendar-day">2</div><div class="calendar-day">3</div><div class="calendar-day">4</div><div class="calendar-day">5</div><div class="calendar-day">6</div><div class="calendar-day">7</div><div class="calendar-day">8</div><div class="calendar-day">9</div><div class="calendar-day">10</div><div class="calendar-day">11</div><div class="calendar-day">12</div><div class="calendar-day">13</div><div class="calendar-day">14</div><div class="calendar-day">15</div><div class="calendar-day">16</div><div class="calendar-day">17</div><div class="calendar-day">18</div><div class="calendar-day">19</div><div class="calendar-day">20</div><div class="calendar-day">21</div><div class="calendar-day">22</div><div class="calendar-day">23</div><div class="calendar-day">24</div><div class="calendar-day">25</div><div class="calendar-day today selected">26</div><div class="calendar-day">27</div><div class="calendar-day">28</div><div class="calendar-day">29</div><div class="calendar-day">30</div><div class="calendar-day">31</div></div>
+                    <div class="calendar-legend">
+                        <div class="legend-item">
+                            <div class="legend-dot today"></div>
+                            <span>Hoy</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-dot selected"></div>
+                            <span>Seleccionado</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-dot has-data"></div>
+                            <span>Con datos</span>
+                        </div>
+                    </div>
+                    <div class="quick-actions">
+                        <button class="quick-action-btn" onclick="goToToday()">Ir a Hoy</button>
+                        <button class="quick-action-btn" onclick="clearCurrentDay()">Limpiar Día</button>
+                        <button class="quick-action-btn" onclick="showStockModal()">Ver Stock</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column: Production Form -->
+            <div class="card">
+                <div class="card-header">
+                    <h2>
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                        </svg>
+                        Registro de Producción
+                    </h2>
+                    <button class="btn btn-outline" onclick="resetAllData()" style="padding: 8px 16px; font-size: 0.85rem;">
+                        Resetear Todo
+                    </button>
+                </div>
+                <div class="card-body">
+                    <div class="info-bar">
+                        <div class="info-item">
+                            <div class="label">Fecha Seleccionada</div>
+                            <div class="value" id="selected-date">--/--/----</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="label">Total del Día</div>
+                            <div class="value" id="daily-total">0</div>
+                        </div>
+                    </div>
+
+                    <div class="table-container">
+                        <table class="production-table" id="production-table">
+                            <thead>
+                                <tr>
+                                    <th>Modelo / Medida</th>
+                                    <th>1 Plaza<br><small>(80cm)</small></th>
+                                    <th>1.5 Plazas<br><small>(100cm)</small></th>
+                                    <th>2 Plazas<br><small>(140cm)</small></th>
+                                    <th>Queen<br><small>(160cm)</small></th>
+                                    <th>King<br><small>(180cm)</small></th>
+                                    <th>A Pedido</th>
+                                    <th>Total</th>
+                                    <th class="observation-header">Observaciones</th>
+                                </tr>
+                            </thead>
+                            <tbody id="production-tbody"><tr><td><strong>Purmamarca</strong></td><td><input type="number" min="0"></td><td><input type="number" min="0"></td><td><input type="number" min="0"></td><td><input type="number" min="0"></td><td><input type="number" min="0"></td><td><input type="number" min="0"></td><td class="row-total" id="total-purmamarca">0</td><td class="observation-cell"><input type="text" placeholder="Observaciones..." style="width: 100%;"></td></tr><tr><td><strong>Tilcara</strong></td><td><input type="number" min="0"></td><td><input type="number" min="0"></td><td><input type="number" min="0"></td><td><input type="number" min="0"></td><td><input type="number" min="0"></td><td><input type="number" min="0"></td><td class="row-total" id="total-tilcara">0</td><td class="observation-cell"><input type="text" placeholder="Observaciones..." style="width: 100%;"></td></tr><tr><td><strong>Azul Pampa</strong></td><td><input type="number" min="0"></td><td><input type="number" min="0"></td><td><input type="number" min="0"></td><td><input type="number" min="0"></td><td><input type="number" min="0"></td><td><input type="number" min="0"></td><td class="row-total" id="total-azul-pampa">0</td><td class="observation-cell"><input type="text" placeholder="Observaciones..." style="width: 100%;"></td></tr><tr><td><strong>Humahuaca</strong></td><td><input type="number" min="0"></td><td><input type="number" min="0"></td><td><input type="number" min="0"></td><td><input type="number" min="0"></td><td><input type="number" min="0"></td><td><input type="number" min="0"></td><td class="row-total" id="total-humahuaca">0</td><td class="observation-cell"><input type="text" placeholder="Observaciones..." style="width: 100%;"></td></tr><tr><td><strong>Volcan</strong></td><td><input type="number" min="0"></td><td><input type="number" min="0"></td><td><input type="number" min="0"></td><td><input type="number" min="0"></td><td><input type="number" min="0"></td><td><input type="number" min="0"></td><td class="row-total" id="total-volcan">0</td><td class="observation-cell"><input type="text" placeholder="Observaciones..." style="width: 100%;"></td></tr><tr><td><strong>Calilegua</strong></td><td><input type="number" min="0"></td><td><input type="number" min="0"></td><td><input type="number" min="0"></td><td><input type="number" min="0"></td><td><input type="number" min="0"></td><td><input type="number" min="0"></td><td class="row-total" id="total-calilegua">0</td><td class="observation-cell"><input type="text" placeholder="Observaciones..." style="width: 100%;"></td></tr></tbody>
+                            <tfoot>
+                                <tr>
+                                    <td><strong>Total por Medida</strong></td>
+                                    <td class="col-total" id="col-total-1plaza">0</td>
+                                    <td class="col-total" id="col-total-1_5plazas">0</td>
+                                    <td class="col-total" id="col-total-2plazas">0</td>
+                                    <td class="col-total" id="col-total-queen">0</td>
+                                    <td class="col-total" id="col-total-king">0</td>
+                                    <td class="col-total" id="col-total-apedido">0</td>
+                                    <td class="grand-total" id="grand-total">0</td>
+                                    <td></td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+
+                    <div class="btn-group" style="margin-top: 24px;">
+                        <button class="btn btn-primary" onclick="saveProduction()">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
+                                <polyline points="17 21 17 13 7 13 7 21"></polyline>
+                                <polyline points="7 3 7 8 15 8"></polyline>
+                            </svg>
+                            Guardar Producción
+                        </button>
+                    </div>
+
+                    <div class="export-section">
+                        <h3>Exportar Reportes</h3>
+                        <div class="btn-group">
+                            <button class="btn btn-secondary" onclick="exportPDF()">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                                    <polyline points="14 2 14 8 20 8"></polyline>
+                                    <line x1="12" y1="18" x2="12" y2="12"></line>
+                                    <line x1="9" y1="15" x2="15" y2="15"></line>
+                                </svg>
+                                Exportar PDF
+                            </button>
+                            <button class="btn btn-outline" onclick="exportWord()">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                                    <polyline points="14 2 14 8 20 8"></polyline>
+                                    <line x1="16" y1="13" x2="8" y2="13"></line>
+                                    <line x1="16" y1="17" x2="8" y2="17"></line>
+                                    <polyline points="10 9 9 9 8 9"></polyline>
+                                </svg>
+                                Exportar Word
+                            </button>
+                            <button class="btn btn-outline" onclick="exportCurrentDay()">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                                    <line x1="16" y1="2" x2="16" y2="6"></line>
+                                    <line x1="8" y1="2" x2="8" y2="6"></line>
+                                    <line x1="3" y1="10" x2="21" y2="10"></line>
+                                </svg>
+                                Día Actual (PDF)
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Stock Summary Section -->
+        <div class="card" style="margin-top: 30px;">
+            <div class="card-header">
+                <h2>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="12" y1="20" x2="12" y2="10"></line>
+                        <line x1="18" y1="20" x2="18" y2="4"></line>
+                        <line x1="6" y1="20" x2="6" y2="16"></line>
+                    </svg>
+                    Resumen de Stock por Modelo
+                </h2>
+            </div>
+            <div class="card-body">
+                <div class="stock-grid" id="stock-grid"><div class="stock-card">
+                    <div class="model-name">Purmamarca</div>
+                    <div class="stock-count">0</div>
+                    
+                </div><div class="stock-card">
+                    <div class="model-name">Tilcara</div>
+                    <div class="stock-count">0</div>
+                    
+                </div><div class="stock-card">
+                    <div class="model-name">Azul Pampa</div>
+                    <div class="stock-count">0</div>
+                    
+                </div><div class="stock-card">
+                    <div class="model-name">Humahuaca</div>
+                    <div class="stock-count">0</div>
+                    
+                </div><div class="stock-card">
+                    <div class="model-name">Volcan</div>
+                    <div class="stock-count">0</div>
+                    
+                </div><div class="stock-card">
+                    <div class="model-name">Calilegua</div>
+                    <div class="stock-count">0</div>
+                    
+                </div></div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Stock Modal -->
+    <div class="modal-overlay" id="stock-modal">
+        <div class="modal">
+            <h3>Stock Actual por Medida</h3>
+            <div id="stock-modal-content"></div>
+            <div class="modal-actions">
+                <button class="btn btn-outline" onclick="closeStockModal()">Cerrar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Container -->
+    <div class="toast-container" id="toast-container"></div>
+
+    <script>
+        // Configuration
+        const MODELS = [
+            'Purmamarca',
+            'Tilcara',
+            'Azul Pampa',
+            'Humahuaca',
+            'Volcan',
+            'Calilegua'
+        ];
+
+        const SIZES = ['1plaza', '1_5plazas', '2plazas', 'queen', 'king', 'apedido'];
+        const SIZE_LABELS = {
+            '1plaza': '1 Plaza (80cm)',
+            '1_5plazas': '1.5 Plazas (100cm)',
+            '2plazas': '2 Plazas (140cm)',
+            'queen': 'Queen (160cm)',
+            'king': 'King (180cm)',
+            'apedido': 'A Pedido'
+        };
+
+        // State
+        let currentDate = new Date();
+        let selectedDate = new Date();
+        let productionData = {};
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            loadData();
+            renderCalendar();
+            renderProductionTable();
+            updateStats();
+            renderStockGrid();
+        });
+
+        // LocalStorage Functions
+        function loadData() {
+            const saved = localStorage.getItem('mattressProductionData');
+            if (saved) {
+                productionData = JSON.parse(saved);
+            }
+        }
+
+        function saveData() {
+            localStorage.setItem('mattressProductionData', JSON.stringify(productionData));
+        }
+
+        // Calendar Functions
+        function renderCalendar() {
+            const grid = document.getElementById('calendar-grid');
+            grid.innerHTML = '';
+
+            // Day headers
+            const days = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
+            days.forEach(day => {
+                const header = document.createElement('div');
+                header.className = 'calendar-day-header';
+                header.textContent = day;
+                grid.appendChild(header);
+            });
+
+            const year = currentDate.getFullYear();
+            const month = currentDate.getMonth();
+
+            document.getElementById('month-year').textContent = 
+                currentDate.toLocaleDateString('es-ES', { month: 'long', year: 'numeric' });
+
+            const firstDay = new Date(year, month, 1);
+            const lastDay = new Date(year, month + 1, 0);
+            const startDay = firstDay.getDay();
+            const daysInMonth = lastDay.getDate();
+
+            // Empty cells before first day
+            for (let i = 0; i < startDay; i++) {
+                const empty = document.createElement('div');
+                empty.className = 'calendar-day empty';
+                grid.appendChild(empty);
+            }
+
+            const today = new Date();
+            const dateKey = getDateKey(selectedDate);
+
+            // Days
+            for (let day = 1; day <= daysInMonth; day++) {
+                const dayEl = document.createElement('div');
+                dayEl.className = 'calendar-day';
+                dayEl.textContent = day;
+
+                const date = new Date(year, month, day);
+                const key = getDateKey(date);
+
+                if (date.toDateString() === today.toDateString()) {
+                    dayEl.classList.add('today');
+                }
+
+                if (key === dateKey) {
+                    dayEl.classList.add('selected');
+                }
+
+                if (productionData[key]) {
+                    dayEl.classList.add('has-data');
+                }
+
+                dayEl.onclick = () => selectDate(date);
+                grid.appendChild(dayEl);
+            }
+        }
+
+        function selectDate(date) {
+            selectedDate = date;
+            document.getElementById('selected-date').textContent = 
+                date.toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+            renderCalendar();
+            renderProductionTable();
+        }
+
+        function changeMonth(delta) {
+            currentDate.setMonth(currentDate.getMonth() + delta);
+            renderCalendar();
+        }
+
+        function goToToday() {
+            const today = new Date();
+            currentDate = new Date(today);
+            selectDate(today);
+        }
+
+        function getDateKey(date) {
+            return date.toISOString().split('T')[0];
+        }
+
+        // Production Table Functions
+        function renderProductionTable() {
+            const tbody = document.getElementById('production-tbody');
+            tbody.innerHTML = '';
+
+            const dateKey = getDateKey(selectedDate);
+            const dayData = productionData[dateKey] || {};
+
+            MODELS.forEach(model => {
+                const row = document.createElement('tr');
+                
+                const modelCell = document.createElement('td');
+                modelCell.innerHTML = `<strong>${model}</strong>`;
+                row.appendChild(modelCell);
+
+                let rowTotal = 0;
+
+                SIZES.forEach(size => {
+                    const cell = document.createElement('td');
+                    const input = document.createElement('input');
+                    input.type = 'number';
+                    input.min = '0';
+                    input.value = dayData[`${model}_${size}`] || 0;
+                    input.onchange = (e) => updateCell(model, size, e.target.value);
+                    input.oninput = () => calculateTotals();
+                    
+                    rowTotal += parseInt(input.value) || 0;
+                    cell.appendChild(input);
+                    row.appendChild(cell);
+                });
+
+                const totalCell = document.createElement('td');
+                totalCell.className = 'row-total';
+                totalCell.id = `total-${model.replace(/\s+/g, '-').toLowerCase()}`;
+                totalCell.textContent = rowTotal;
+                row.appendChild(totalCell);
+
+                // Observation cell
+                const obsCell = document.createElement('td');
+                obsCell.className = 'observation-cell';
+                const obsInput = document.createElement('input');
+                obsInput.type = 'text';
+                obsInput.placeholder = 'Observaciones...';
+                obsInput.value = dayData[`${model}_observacion`] || '';
+                obsInput.onchange = (e) => updateObservation(model, e.target.value);
+                obsInput.style.width = '100%';
+                obsCell.appendChild(obsInput);
+                row.appendChild(obsCell);
+
+                tbody.appendChild(row);
+            });
+
+            calculateTotals();
+        }
+
+        function updateCell(model, size, value) {
+            const dateKey = getDateKey(selectedDate);
+            if (!productionData[dateKey]) {
+                productionData[dateKey] = {};
+            }
+            productionData[dateKey][`${model}_${size}`] = parseInt(value) || 0;
+            saveData();
+            renderCalendar();
+            updateStats();
+            renderStockGrid();
+        }
+
+        function updateObservation(model, value) {
+            const dateKey = getDateKey(selectedDate);
+            if (!productionData[dateKey]) {
+                productionData[dateKey] = {};
+            }
+            productionData[dateKey][`${model}_observacion`] = value;
+            saveData();
+        }
+
+        function calculateTotals() {
+            const dateKey = getDateKey(selectedDate);
+            const dayData = productionData[dateKey] || {};
+
+            const colTotals = {};
+            let grandTotal = 0;
+
+            SIZES.forEach(size => colTotals[size] = 0);
+
+            MODELS.forEach(model => {
+                let rowTotal = 0;
+                SIZES.forEach(size => {
+                    const input = document.querySelector(`input[type="number"][onchange*="${model}_${size}"]`);
+                    const value = input ? parseInt(input.value) : (dayData[`${model}_${size}`] || 0);
+                    colTotals[size] += value;
+                    rowTotal += value;
+                });
+                grandTotal += rowTotal;
+                const rowTotalEl = document.getElementById(`total-${model.replace(/\s+/g, '-').toLowerCase()}`);
+                if (rowTotalEl) rowTotalEl.textContent = rowTotal;
+            });
+
+            SIZES.forEach(size => {
+                const el = document.getElementById(`col-total-${size}`);
+                if (el) el.textContent = colTotals[size];
+            });
+
+            document.getElementById('grand-total').textContent = grandTotal;
+            document.getElementById('daily-total').textContent = grandTotal;
+        }
+
+        // Save Functions
+        function saveProduction() {
+            const dateKey = getDateKey(selectedDate);
+            const inputs = document.querySelectorAll('#production-tbody input[type="number"]');
+            const obsInputs = document.querySelectorAll('#production-tbody input[type="text"]');
+            const dayData = {};
+
+            let numIndex = 0;
+            MODELS.forEach(model => {
+                SIZES.forEach(size => {
+                    const input = inputs[numIndex];
+                    if (input) {
+                        dayData[`${model}_${size}`] = parseInt(input.value) || 0;
+                    }
+                    numIndex++;
+                });
+            });
+
+            // Save observations
+            let obsIndex = 0;
+            MODELS.forEach(model => {
+                const obsInput = obsInputs[obsIndex];
+                if (obsInput) {
+                    dayData[`${model}_observacion`] = obsInput.value;
+                }
+                obsIndex++;
+            });
+
+            productionData[dateKey] = dayData;
+            saveData();
+            renderCalendar();
+            updateStats();
+            renderStockGrid();
+            showToast('Producción guardada correctamente', 'success');
+        }
+
+        function clearCurrentDay() {
+            const dateKey = getDateKey(selectedDate);
+            if (confirm('¿Estás seguro de borrar los datos del día seleccionado?')) {
+                delete productionData[dateKey];
+                saveData();
+                renderCalendar();
+                renderProductionTable();
+                updateStats();
+                renderStockGrid();
+                showToast('Datos del día borrados', 'success');
+            }
+        }
+
+        function resetAllData() {
+            if (confirm('¿Estás seguro de BORRAR TODOS los datos? Esta acción no se puede deshacer.')) {
+                productionData = {};
+                saveData();
+                renderCalendar();
+                renderProductionTable();
+                updateStats();
+                renderStockGrid();
+                showToast('Todos los datos han sido borrados', 'success');
+            }
+        }
+
+        // Stats Functions
+        function updateStats() {
+            const today = new Date();
+            const currentMonth = today.getMonth();
+            const currentYear = today.getFullYear();
+
+            let monthTotal = 0;
+            let daysWithProduction = 0;
+            let totalStock = 0;
+
+            Object.keys(productionData).forEach(key => {
+                const date = new Date(key);
+                if (date.getMonth() === currentMonth && date.getFullYear() === currentYear) {
+                    const dayData = productionData[key];
+                    Object.values(dayData).forEach(val => {
+                        if (typeof val === 'number') {
+                            monthTotal += val;
+                        }
+                    });
+                    daysWithProduction++;
+                }
+
+                const dayData = productionData[key];
+                Object.values(dayData).forEach(val => {
+                    if (typeof val === 'number') {
+                        totalStock += val;
+                    }
+                });
+            });
+
+            document.getElementById('total-production-month').textContent = monthTotal.toLocaleString();
+            document.getElementById('total-stock').textContent = totalStock.toLocaleString();
+            document.getElementById('days-with-production').textContent = daysWithProduction;
+        }
+
+        // Stock Grid Functions
+        function renderStockGrid() {
+            const grid = document.getElementById('stock-grid');
+            grid.innerHTML = '';
+
+            MODELS.forEach(model => {
+                let modelTotal = 0;
+                let breakdown = [];
+
+                SIZES.forEach(size => {
+                    let sizeTotal = 0;
+                    Object.values(productionData).forEach(dayData => {
+                        sizeTotal += dayData[`${model}_${size}`] || 0;
+                    });
+                    modelTotal += sizeTotal;
+                    if (sizeTotal > 0) {
+                        const label = SIZE_LABELS[size] || size;
+                        breakdown.push(`${label}: ${sizeTotal}`);
+                    }
+                });
+
+                const card = document.createElement('div');
+                card.className = 'stock-card';
+                card.innerHTML = `
+                    <div class="model-name">${model}</div>
+                    <div class="stock-count">${modelTotal.toLocaleString()}</div>
+                    ${breakdown.length > 0 ? `<div class="stock-breakdown">${breakdown.join(' | ')}</div>` : ''}
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        function showStockModal() {
+            const modal = document.getElementById('stock-modal');
+            const content = document.getElementById('stock-modal-content');
+            
+            let html = '<table style="width:100%; border-collapse: collapse; font-size: 0.85rem;">';
+            html += '<tr style="background: #f1f5f9;"><th style="padding: 10px; text-align: left;">Modelo</th>';
+            SIZES.forEach(size => {
+                html += `<th style="padding: 10px; text-align: center;">${SIZE_LABELS[size]}</th>`;
+            });
+            html += '<th style="padding: 10px; text-align: center;">Total</th></tr>';
+
+            MODELS.forEach(model => {
+                html += `<tr><td style="padding: 10px; border-bottom: 1px solid #e2e8f0;"><strong>${model}</strong></td>`;
+                let rowTotal = 0;
+                SIZES.forEach(size => {
+                    let sizeTotal = 0;
+                    Object.values(productionData).forEach(dayData => {
+                        sizeTotal += dayData[`${model}_${size}`] || 0;
+                    });
+                    rowTotal += sizeTotal;
+                    html += `<td style="padding: 10px; text-align: center; border-bottom: 1px solid #e2e8f0;">${sizeTotal}</td>`;
+                });
+                html += `<td style="padding: 10px; text-align: center; border-bottom: 1px solid #e2e8f0; font-weight: bold;">${rowTotal}</td></tr>`;
+            });
+
+            html += '</table>';
+            content.innerHTML = html;
+            modal.classList.add('active');
+        }
+
+        function closeStockModal() {
+            document.getElementById('stock-modal').classList.remove('active');
+        }
+
+        // Export Functions
+        function exportPDF() {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF('landscape');
+
+            // Title
+            doc.setFontSize(18);
+            doc.setTextColor(30, 58, 138);
+            doc.text('Reporte de Producción - Fábrica de Colchones', 14, 15);
+
+            doc.setFontSize(10);
+            doc.setTextColor(100);
+            doc.text(`Generado: ${new Date().toLocaleString('es-ES')}`, 14, 22);
+
+            // Stock Summary Table
+            const stockData = MODELS.map(model => {
+                let row = [model];
+                let rowTotal = 0;
+                SIZES.forEach(size => {
+                    let sizeTotal = 0;
+                    Object.values(productionData).forEach(dayData => {
+                        sizeTotal += dayData[`${model}_${size}`] || 0;
+                    });
+                    row.push(sizeTotal);
+                    rowTotal += sizeTotal;
+                });
+                row.push(rowTotal);
+                return row;
+            });
+
+            const headers = ['Modelo', '1 Plaza', '1.5 Plazas', '2 Plazas', 'Queen', 'King (180cm)', 'A Pedido', 'Total'];
+
+            doc.autoTable({
+                head: [headers],
+                body: stockData,
+                startY: 28,
+                theme: 'striped',
+                headStyles: { fillColor: [30, 58, 138] },
+                foot: [['', '', '', '', '', '', 'Total General', 
+                    stockData.reduce((sum, row) => sum + row[row.length - 1], 0)]],
+                footStyles: { fillColor: [59, 130, 246] }
+            });
+
+            // Daily Production if selected day has data
+            const dateKey = getDateKey(selectedDate);
+            const dayData = productionData[dateKey];
+
+            if (dayData && Object.values(dayData).some(v => typeof v === 'number' && v > 0)) {
+                let finalY = doc.lastAutoTable.finalY + 12;
+                
+                doc.setFontSize(12);
+                doc.setTextColor(30, 58, 138);
+                doc.text(`Producción del ${selectedDate.toLocaleDateString('es-ES')}`, 14, finalY);
+
+                const dailyData = MODELS.map(model => {
+                    let row = [model];
+                    let rowTotal = 0;
+                    SIZES.forEach(size => {
+                        const value = dayData[`${model}_${size}`] || 0;
+                        row.push(value);
+                        rowTotal += value;
+                    });
+                    row.push(rowTotal);
+                    return row;
+                });
+
+                doc.autoTable({
+                    head: [headers],
+                    body: dailyData,
+                    startY: finalY + 5,
+                    theme: 'grid',
+                    headStyles: { fillColor: [16, 185, 129] }
+                });
+
+                // Add observations if any
+                const modelsWithObs = MODELS.filter(model => dayData[`${model}_observacion`] && dayData[`${model}_observacion`].trim() !== '');
+                if (modelsWithObs.length > 0) {
+                    let obsY = doc.lastAutoTable.finalY + 10;
+                    
+                    doc.setFontSize(10);
+                    doc.setTextColor(30, 58, 138);
+                    doc.text('Observaciones:', 14, obsY);
+                    obsY += 6;
+                    
+                    doc.setFontSize(9);
+                    doc.setTextColor(71, 85, 105);
+                    modelsWithObs.forEach(model => {
+                        doc.text(`${model}: ${dayData[`${model}_observacion`]}`, 14, obsY);
+                        obsY += 5;
+                    });
+                }
+            }
+
+            doc.save(`reporte-produccion-${new Date().toISOString().split('T')[0]}.pdf`);
+            showToast('PDF exportado correctamente', 'success');
+        }
+
+        function exportWord() {
+            let html = `
+                <html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word'>
+                <head><meta charset='utf-8'><title>Reporte de Producción</title></head>
+                <body>
+                    <h1 style="color: #1e3a8a; font-family: Arial;">Reporte de Producción - Fábrica de Colchones</h1>
+                    <p style="color: #666;"><strong>Generado:</strong> ${new Date().toLocaleString('es-ES')}</p>
+                    
+                    <h2 style="color: #1e3a8a; font-family: Arial;">Resumen de Stock</h2>
+                    <table border="1" style="border-collapse: collapse; width: 100%; font-family: Arial; font-size: 12px;">
+                        <tr style="background: #1e3a8a; color: white;">
+                            <th style="padding: 10px;">Modelo</th>
+                            <th style="padding: 10px;">1 Plaza</th>
+                            <th style="padding: 10px;">1.5 Plazas</th>
+                            <th style="padding: 10px;">2 Plazas</th>
+                            <th style="padding: 10px;">Queen</th>
+                            <th style="padding: 10px;">King (180cm)</th>
+                            <th style="padding: 10px;">A Pedido</th>
+                            <th style="padding: 10px;">Total</th>
+                        </tr>
+            `;
+
+            MODELS.forEach(model => {
+                let rowTotal = 0;
+                html += `<tr><td style="padding: 8px;"><strong>${model}</strong></td>`;
+                SIZES.forEach(size => {
+                    let sizeTotal = 0;
+                    Object.values(productionData).forEach(dayData => {
+                        sizeTotal += dayData[`${model}_${size}`] || 0;
+                    });
+                    rowTotal += sizeTotal;
+                    html += `<td style="padding: 8px; text-align: center;">${sizeTotal}</td>`;
+                });
+                html += `<td style="padding: 8px; text-align: center;"><strong>${rowTotal}</strong></td></tr>`;
+            });
+
+            html += '</table>';
+
+            // Add observations section
+            const dateKey = getDateKey(selectedDate);
+            const dayData = productionData[dateKey];
+            const modelsWithObs = MODELS.filter(model => dayData && dayData[`${model}_observacion`] && dayData[`${model}_observacion`].trim() !== '');
+
+            if (modelsWithObs.length > 0) {
+                html += `<h2 style="color: #1e3a8a; font-family: Arial; margin-top: 20px;">Observaciones del ${selectedDate.toLocaleDateString('es-ES')}</h2>`;
+                modelsWithObs.forEach(model => {
+                    html += `<p style="font-family: Arial;"><strong>${model}:</strong> ${dayData[`${model}_observacion`]}</p>`;
+                });
+            }
+
+            html += '</body></html>';
+
+            const blob = new Blob(['\ufeff', html], { type: 'application/msword' });
+            saveAs(blob, `reporte-produccion-${new Date().toISOString().split('T')[0]}.doc`);
+            showToast('Word exportado correctamente', 'success');
+        }
+
+        function exportCurrentDay() {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF('landscape');
+
+            const dateKey = getDateKey(selectedDate);
+            const dayData = productionData[dateKey] || {};
+
+            doc.setFontSize(18);
+            doc.setTextColor(30, 58, 138);
+            doc.text(`Producción del ${selectedDate.toLocaleDateString('es-ES')}`, 14, 15);
+
+            const dailyData = MODELS.map(model => {
+                let row = [model];
+                let rowTotal = 0;
+                SIZES.forEach(size => {
+                    const value = dayData[`${model}_${size}`] || 0;
+                    row.push(value);
+                    rowTotal += value;
+                });
+                row.push(rowTotal);
+                return row;
+            });
+
+            const headers = ['Modelo', '1 Plaza', '1.5 Plazas', '2 Plazas', 'Queen', 'King (180cm)', 'A Pedido', 'Total'];
+
+            doc.autoTable({
+                head: [headers],
+                body: dailyData,
+                startY: 22,
+                theme: 'striped',
+                headStyles: { fillColor: [16, 185, 129] },
+                styles: { fontSize: 10 }
+            });
+
+            const grandTotal = dailyData.reduce((sum, row) => sum + row[row.length - 1], 0);
+            
+            doc.setFontSize(12);
+            doc.setTextColor(30, 58, 138);
+            doc.text(`Total del día: ${grandTotal} colchones`, 14, doc.lastAutoTable.finalY + 10);
+
+            // Add observations if any
+            const modelsWithObs = MODELS.filter(model => dayData[`${model}_observacion`] && dayData[`${model}_observacion`].trim() !== '');
+            if (modelsWithObs.length > 0) {
+                let obsY = doc.lastAutoTable.finalY + 18;
+                
+                doc.setFontSize(10);
+                doc.setTextColor(30, 58, 138);
+                doc.text('Observaciones:', 14, obsY);
+                obsY += 6;
+                
+                doc.setFontSize(9);
+                doc.setTextColor(71, 85, 105);
+                modelsWithObs.forEach(model => {
+                    doc.text(`${model}: ${dayData[`${model}_observacion`]}`, 14, obsY);
+                    obsY += 5;
+                });
+            }
+
+            doc.save(`produccion-${dateKey}.pdf`);
+            showToast('PDF del día exportado', 'success');
+        }
+
+        // Toast Notification
+        function showToast(message, type = 'success') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.innerHTML = `
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="${type === 'success' ? '#10b981' : '#ef4444'}" stroke-width="2">
+                    ${type === 'success' 
+                        ? '<path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline>'
+                        : '<circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line>'
+                    }
+                </svg>
+                <span>${message}</span>
+            `;
+            container.appendChild(toast);
+
+            setTimeout(() => {
+                toast.style.animation = 'slideIn 0.3s ease reverse';
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+
+        // Close modal on outside click
+        document.getElementById('stock-modal').addEventListener('click', function(e) {
+            if (e.target === this) closeStockModal();
+        });
+    </script>
+
+
+</body></html>
